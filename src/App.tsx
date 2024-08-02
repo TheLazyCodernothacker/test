@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
+import "./App.css";
+
 function App() {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
     const socket = io({ transports: ["websocket"] });
 
-    socket.emit("message", "hello");
+    socket.emit("message", "nig");
 
     return () => {
       socket.disconnect();
