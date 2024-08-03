@@ -3,12 +3,74 @@ const http = require("http");
 
 const { createServer: createViteServer } = require("vite");
 const { createIOServer } = require("./io");
+const mongoose = require("mongoose");
+const User = require("./models/user");
+const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 
-const port = process.env.APP_PORT || 5000;
+const port = 5000;
 
 async function createMainServer() {
   const app = express();
+  app.use(bodyParser.json());
+  app.use(cookieParser());
   const server = http.createServer(app);
+  try {
+    await mongoose.connect(
+      "mongodb+srv://MaxLocke:yanjiasucks@coducationusers.8l73h11.mongodb.net/users?retryWrites=true&w=majority"
+    );
+    console.log("Connected to MongoDB");
+  } catch (error) {
+    console.error(error);
+  }
+  app.post("/api/signup", async (req, res) => {
+    const { username, password } = req.body;
+    let users = await User.find();
+    console.log(users);
+    const user = await User.findOne({ username });
+
+    if (user) {
+      console.log("User already exists");
+      res.status(400);
+      res.json({ message: "User already exists" });
+      return;
+    }
+    try {
+      const user = new User({
+        username,
+        password,
+      });
+      user.save().then(() => {
+        console.log("User saved");
+        res.json({ message: "User saved" });
+      });
+    } catch (error) {
+      res.status(500);
+      console.error(error);
+      res.json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/login", async (req, res) => {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username, password });
+    if (user) {
+      res.json({ message: "Logged in" });
+    } else {
+      res.status(400);
+      res.json({ message: "User not found" });
+    }
+  });
+
+  app.get("/api/checkSession", async (req, res) => {
+    const { session } = req.cookies;
+    if (session) {
+      res.json({ message: "Session found" });
+    } else {
+      res.status(400);
+      res.json({ message: "Session not found" });
+    }
+  });
 
   createIOServer(server);
 
@@ -16,10 +78,10 @@ async function createMainServer() {
     server: {
       middlewareMode: true,
       hmr: {
-        server
-      }
+        server,
+      },
     },
-    appType: "spa"
+    appType: "spa",
   });
 
   app.use(vite.middlewares);
