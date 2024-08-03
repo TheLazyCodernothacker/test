@@ -4,7 +4,7 @@ const http = require("http");
 const { createServer: createViteServer } = require("vite");
 const { createIOServer } = require("./io");
 
-const port = process.env.APP_PORT || 3010;
+const port = process.env.APP_PORT || 5000;
 
 async function createMainServer() {
   const app = express();

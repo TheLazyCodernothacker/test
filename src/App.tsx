@@ -1,35 +1,36 @@
+//  useEffect(() => {
+//     const socket = io({ transports: ["websocket"] });
+
+//     socket.emit("message", "nig");
+
+//     return () => {
+//       socket.disconnect();
+//     };
+//   }, []);
+
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import Logo from "./Logo_square.png"
+import React from 'react';
+import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom';
+import Home from './Home';
+import Login from "./Login"
 
-import "./App.css";
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      </>
+  )
+)
 
-function App() {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    const socket = io({ transports: ["websocket"] });
-
-    socket.emit("message", "nig");
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+function App({routes}) {
 
   return (
-    <div className="App">
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
+    <>
+      <RouterProvider router={router}/>
+    </>
   );
 }
 

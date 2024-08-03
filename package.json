@@ -5,11 +5,15 @@
   "license": "MIT",
   "dependencies": {
     "express": "4.18.1",
+    "localforage": "^1.10.0",
+    "match-sorter": "^6.3.4",
     "nodemon": "2.0.19",
-    "socket.io": "4.5.1"
+    "react-router-dom": "^6.26.0",
+    "socket.io": "4.5.1",
+    "sort-by": "^1.2.0"
   },
   "scripts": {
-    "start": "APP_PORT=3010 nodemon --ignore ./src index.js"
+    "start": "APP_PORT=5000 nodemon --ignore ./src index.js"
   },
   "devDependencies": {
     "@types/node": "^17.0.21",
