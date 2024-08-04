@@ -10,6 +10,8 @@ const cookieParser = require("cookie-parser");
 
 const port = 5000;
 
+let users = {};
+
 async function createMainServer() {
   const app = express();
   app.use(bodyParser.json());
@@ -54,18 +56,26 @@ async function createMainServer() {
   app.post("/api/login", async (req, res) => {
     const { username, password } = req.body;
     const user = await User.findOne({ username, password });
+    console.log(user);
     if (user) {
-      res.json({ message: "Logged in" });
+      res.json({ message: "Logged in", id: user._id });
     } else {
       res.status(400);
       res.json({ message: "User not found" });
     }
   });
 
-  app.get("/api/checkSession", async (req, res) => {
-    const { session } = req.cookies;
-    if (session) {
+  app.post("/api/checkSession", async (req, res) => {
+    const { id } = req.body;
+    if (id === "none") {
+      res.status(400);
+      res.json({ message: "Session not found" });
+      return;
+    }
+    let user = await User.findById(id);
+    if (user) {
       res.json({ message: "Session found" });
+      users[id] = user;
     } else {
       res.status(400);
       res.json({ message: "Session not found" });

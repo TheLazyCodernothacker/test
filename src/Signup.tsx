@@ -8,7 +8,7 @@ export default function Signup() {
     e.preventDefault();
     const username = usernameRef.current.value;
     const password = passwordRef.current.value;
-    if (document.cookie === "signedup=true") {
+    if (localStorage.getItem("signedup") === "true") {
       alert("You have already signed up!");
       return;
     }
@@ -50,7 +50,7 @@ export default function Signup() {
 
     if (data.message === "User saved") {
       alert("Signup successful!");
-      document.cookie = "signedup=true";
+      localStorage.setItem("signedup", "true");
       window.location.href = "/login";
     } else {
       alert(data.message);
