@@ -1,5 +1,6 @@
 import Logo from "./Logo_square.png";
 import { useRef } from "react";
+import "./App.css";
 
 export default function Login() {
   const usernameRef = useRef(null);
@@ -8,33 +9,6 @@ export default function Login() {
     e.preventDefault();
     const username = usernameRef.current.value;
     const password = passwordRef.current.value;
-
-    if (username.length < 3) {
-      alert("Username must be at least 3 characters long!");
-      return;
-    }
-    if (password.length < 6) {
-      alert("Password must be at least 6 characters long!");
-      return;
-    }
-    if (username.length > 20) {
-      alert("Username must be at most 20 characters long!");
-      return;
-    }
-    if (password.length > 20) {
-      alert("Password must be at most 20 characters long!");
-      return;
-    }
-    //use regex to check if username is alphanumeric
-    if (!/^[a-zA-Z0-9]+$/.test(username)) {
-      alert("Username must be alphanumeric!");
-      return;
-    }
-
-    if (password.includes(" ")) {
-      alert("Password cannot contain spaces!");
-      return;
-    }
 
     const res = await fetch("/api/login", {
       method: "POST",
@@ -57,16 +31,16 @@ export default function Login() {
     <>
       <div className="flex flex-wrap" style={{ minHeight: "90vh" }}>
         <div
-          className="flex items-center justify-center p-8"
+          className="items-center justify-center p-8 hidden md:flex"
           style={{ flex: "300px 1 1" }}
         >
           <img src={Logo} className="w-1/2"></img>
         </div>
         <div
-          className="flex items-center justify-center p-8 bg-sky-700"
+          className="flex md:items-center justify-center p-8 bg-sky-700"
           style={{ flex: "300px 1 1" }}
         >
-          <div className="bg-white rounded shadow-lg p-8">
+          <div className="bg-white rounded shadow-lg p-10">
             <h1 className="text-3xl">Login</h1>
             <form className="mt-4" onSubmit={submit}>
               <div className="mb-4">

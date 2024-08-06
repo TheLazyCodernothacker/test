@@ -1,5 +1,6 @@
 import Logo from "./Logo_square.png";
 import { useRef } from "react";
+import "./App.css";
 
 export default function Signup() {
   const usernameRef = useRef(null);
@@ -60,16 +61,16 @@ export default function Signup() {
     <>
       <div className="flex flex-wrap" style={{ minHeight: "90vh" }}>
         <div
-          className="flex items-center justify-center p-8"
+          className="items-center justify-center p-8 hidden md:flex"
           style={{ flex: "300px 1 1" }}
         >
           <img src={Logo} className="w-1/2"></img>
         </div>
         <div
-          className="flex items-center justify-center p-8 bg-sky-700"
+          className="flex md:items-center justify-center p-8 bg-sky-700"
           style={{ flex: "300px 1 1" }}
         >
-          <div className="bg-white rounded shadow-lg p-8">
+          <div className="bg-white rounded shadow-lg p-10">
             <h1 className="text-3xl">Signup</h1>
             <form className="mt-4" onSubmit={submit}>
               <div className="mb-4">

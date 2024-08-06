@@ -5,6 +5,7 @@ const { createServer: createViteServer } = require("vite");
 const { createIOServer } = require("./io");
 const mongoose = require("mongoose");
 const User = require("./models/user");
+const Chat = require("./models/chat");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 
@@ -80,6 +81,49 @@ async function createMainServer() {
       res.status(400);
       res.json({ message: "Session not found" });
     }
+  });
+
+  app.post("/api/createGroupChat", async (req, res) => {
+    const { id, name } = req.body;
+    let user = await User.findById(id);
+    if (!user) {
+      res.status(400);
+      res.json({ message: "User not found" });
+      return;
+    }
+    const foundchat = await Chat.findOne({ name });
+    if (foundchat) {
+      res.status(400);
+      res.json({ message: "Chat with that name already exists" });
+      return;
+    }
+    let chat = new Chat({
+      users: [id],
+      author: id,
+      name,
+    });
+    chat.save().then(() => {
+      user.groupchats.push(chat._id);
+      user.save().then(() => {
+        res.json({ message: "Group chat created" });
+      });
+    });
+  });
+
+  app.post("/api/getGroupChats", async (req, res) => {
+    const { id } = req.body;
+    let user = await User.findById(id);
+    if (!user) {
+      res.status(400);
+      res.json({ message: "User not found" });
+      return;
+    }
+    let groupChats = [];
+    for (chat of user.groupchats) {
+      let foundchat = await Chat.findById(chat);
+      groupChats.push(foundchat);
+    }
+    res.json({ groupChats });
   });
 
   createIOServer(server);

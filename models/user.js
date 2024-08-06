@@ -9,6 +9,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     type: String,
   },
+  groupchats: {
+    type: Array,
+    default: [],
+  },
 });
 
 module.exports = mongoose.model("FeatherChatUser", userSchema);

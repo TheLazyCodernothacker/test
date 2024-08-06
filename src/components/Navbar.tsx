@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import useSession from "../hooks/useSession";
+import "../App.css";
 
 export default function Navbar() {
   const [loggedIn, setLoggedIn] = useState(false);

@@ -7,9 +7,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     hmr: {
-      port: process.env.APP_PORT || 3010,
-      clientPort: 443,
-      path: "/vite-hmr"
-    }
-  }
+      port: process.env.APP_PORT || 5000,
+      clientPort: 5000,
+      path: "/vite-hmr",
+    },
+  },
 });
