@@ -2,14 +2,16 @@ import { useEffect, useState, useRef } from "react";
 import useSession from "./hooks/useSession";
 import useSocket from "./hooks/useSocket";
 import ReactMarkdown from "react-markdown";
+import { text } from "stream/consumers";
 
 export default function Dashboard() {
   const [groupChats, setGroupChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentChat, setCurrentChat] = useState(null);
-  const [message, setMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [userName, setUserName] = useState("");
+  const [message, setMessage] = useState("");
+  const textAreaRef = useRef(null);
   const chatRef = useRef(null);
   const addUserRef = useRef(null);
   const gcName = useRef(null);
@@ -65,7 +67,23 @@ export default function Dashboard() {
     fetchSession();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter" && currentChat) {
+        e.preventDefault();
+        sendMessage(currentChat._id);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [currentChat]);
+
   function sendMessage(id) {
+    const message = textAreaRef.current.value;
     if (!message) return;
 
     if (socket) {
@@ -74,6 +92,7 @@ export default function Dashboard() {
         id: localStorage.getItem("id"),
         chatId: id,
       });
+      textAreaRef.current.value = "";
     }
 
     setGroupChats((prevGroupChats) => {
@@ -266,8 +285,7 @@ export default function Dashboard() {
                 <textarea
                   className="p-2 w-full  bg-gray-200 text-md px-4 h-full"
                   placeholder="Send your wisdom"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  ref={textAreaRef}
                 />
                 <button
                   className="absolute right-0 z-20 top-0 h-full bg-sky-500 aspect-square"
