@@ -69,7 +69,6 @@ async function createMainServer() {
   app.post("/api/checkSession", async (req, res) => {
     const { id } = req.body;
     if (id === "none") {
-      res.status(400);
       res.json({ message: "Session not found" });
       return;
     }
@@ -78,7 +77,6 @@ async function createMainServer() {
       res.json({ message: "Session found", user: user.username });
       users[id] = user;
     } else {
-      res.status(400);
       res.json({ message: "Session not found" });
     }
   });
@@ -137,7 +135,9 @@ async function createMainServer() {
     server: {
       middlewareMode: true,
       hmr: {
-        server,
+        protocol: "ws",
+        port: "localhost",  
+        //if locally remove above and do: server : server
       },
     },
     appType: "spa",
