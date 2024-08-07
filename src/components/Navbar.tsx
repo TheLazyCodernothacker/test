@@ -6,8 +6,10 @@ export default function Navbar() {
   const [loggedIn, setLoggedIn] = useState(false);
   useEffect(() => {
     const session = useSession().then((res) => {
-      if (res) {
+      if (res.message !== "Session not found") {
         setLoggedIn(true);
+      } else {
+        setLoggedIn(false);
       }
     });
   }, []);
