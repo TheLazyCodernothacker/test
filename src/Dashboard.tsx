@@ -57,7 +57,7 @@ export default function Dashboard() {
         });
         const data = await resGroupChats.json();
         setGroupChats(data.groupChats);
-        setCurrentChat(data.groupChats[0]);
+        setCurrentChat((chat) => data.groupChats[0]);
         setLoading(false);
       }
     };
@@ -205,7 +205,7 @@ export default function Dashboard() {
                   (currentChat?._id === chat._id ? "bg-sky-600" : "")
                 }
                 key={i}
-                onClick={() => setCurrentChat(chat)}
+                onClick={() => setCurrentChat((pastChat) => chat)}
               >
                 <h1 className="text-white">{chat?.name}</h1>
               </div>
