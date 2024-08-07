@@ -2,7 +2,7 @@ const { Server } = require("socket.io");
 const User = require("./models/user");
 const Chat = require("./models/chat");
 
-let users = {};
+let connectedUsers = {};
 
 module.exports = {
   createIOServer: (server) => {
@@ -18,7 +18,8 @@ module.exports = {
       console.log(`A user connected ${socket.id}`);
 
       socket.on("join", (id) => {
-        users[id] = socket.id;
+        connectedUsers[id] = socket.id;
+        console.log(connectedUsers);
       });
 
       socket.on("message", async (data) => {
@@ -35,11 +36,13 @@ module.exports = {
           message,
           name: user.username,
         });
-        console.log(chat.users);
         chat.users.forEach((user) => {
-          const userId = user.id;
-          if (users[userId] && userId !== id) {
-            io.to(users[userId]).emit("message", {
+          if (connectedUsers[user] && user !== id) {
+            console.log(
+              "sending message to " + connectedUsers[user],
+              socket.id
+            );
+            io.to(connectedUsers[user]).emit("message", {
               chatId,
               name: user.username,
               message,
@@ -48,6 +51,37 @@ module.exports = {
         });
         chat.markModified("messages");
         await chat.save();
+      });
+
+      socket.on("addUserToChat", async (data) => {
+        const { id, chatId, users } = data;
+        const user = await User.findById(id);
+        if (!user) {
+          return;
+        }
+        const chat = await Chat.findById(chatId);
+        if (!chat) {
+          return;
+        }
+        let missedUsers = [];
+        let addUser = false;
+        for (username of users) {
+          let founduser = await User.findOne({ username: username });
+          if (founduser) {
+            if (!chat.users.includes(founduser._id)) {
+              addUser = true;
+              console.log("adding user to chat");
+              chat.users.push(founduser._id.toString());
+              founduser.groupchats.push(chat._id);
+              await founduser.save();
+            }
+          } else {
+            missedUsers.push(username);
+          }
+        }
+        chat.markModified("users");
+        await chat.save();
+        socket.emit("usersAdded", addUser, missedUsers);
       });
 
       socket.on("disconnect", () => {

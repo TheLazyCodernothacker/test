@@ -9,5 +9,5 @@ export default async function useSession() {
     }),
   });
   const data = await res.json();
-  return data.message === "Session found";
+  return data;
 }

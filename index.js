@@ -75,7 +75,7 @@ async function createMainServer() {
     }
     let user = await User.findById(id);
     if (user) {
-      res.json({ message: "Session found" });
+      res.json({ message: "Session found", user: user.username });
       users[id] = user;
     } else {
       res.status(400);
@@ -121,7 +121,12 @@ async function createMainServer() {
     let groupChats = [];
     for (chat of user.groupchats) {
       let foundchat = await Chat.findById(chat);
-      groupChats.push(foundchat);
+      if (foundchat) {
+        groupChats.push(foundchat);
+      } else {
+        user.groupchats = user.groupchats.filter((chat) => chat !== chat);
+        await user.save();
+      }
     }
     res.json({ groupChats });
   });

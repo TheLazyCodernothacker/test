@@ -8,6 +8,7 @@ const useSocket = (url) => {
   useEffect(() => {
     if (!socketRef.current) {
       socketRef.current = io(url);
+      socketRef.current.emit("join", localStorage.getItem("id"));
     }
 
     return () => {
