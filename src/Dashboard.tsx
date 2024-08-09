@@ -15,7 +15,7 @@ export default function Dashboard() {
   const chatRef = useRef(null);
   const addUserRef = useRef(null);
   const gcName = useRef(null);
-  const socket = useSocket("http://localhost:5000");
+  const socket = useSocket("https://tcdy2l-5000.csb.app/");
 
   async function addGroupChat() {
     let groupChatName = gcName.current.value;
