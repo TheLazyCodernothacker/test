@@ -1,13 +1,6 @@
 export default async function useSession() {
-  const res = await fetch("/api/checkSession", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      id: localStorage.getItem("id") || "none",
-    }),
-  });
+  const res = await fetch("/api/checkSession");
+
   const data = await res.json();
   return data;
 }

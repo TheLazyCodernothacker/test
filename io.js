@@ -37,7 +37,7 @@ module.exports = {
           name: user.username,
         });
         chat.users.forEach((user) => {
-          if (connectedUsers[user] && user !== id) {
+          if (connectedUsers[user.toString()] && user.toString() !== id) {
             console.log(
               "sending message to " + connectedUsers[user],
               socket.id
