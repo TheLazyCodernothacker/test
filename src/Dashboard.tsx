@@ -15,7 +15,7 @@ export default function Dashboard() {
   const chatRef = useRef(null);
   const addUserRef = useRef(null);
   const gcName = useRef(null);
-  const socket = useSocket(import.meta.env.SOCKET_PORT);
+  const socket = useSocket(import.meta.env.BASE_URL);
 
   async function addGroupChat() {
     let groupChatName = gcName.current.value;

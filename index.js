@@ -9,6 +9,7 @@ const Chat = require("./models/chat");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const { auth } = require("express-openid-connect");
+require("dotenv").config();
 
 const port = 5000;
 
@@ -21,7 +22,7 @@ async function createMainServer() {
     authRequired: false,
     auth0Logout: true,
     secret: "a long, randomly-generated string stored in env",
-    baseURL: "https://tcdy2l-5000.csb.app/",
+    baseURL: process.env.BASE_URL,
     clientID: "cDYMVSGg1OSuLJLV8YkeM3whKvERL2OW",
     issuerBaseURL: "https://feather-chat.us.auth0.com",
     authorizationParams: {
@@ -132,7 +133,12 @@ async function createMainServer() {
     }
     let user = await User.findOne({ id: userInfo._id });
     if (user) {
-      res.json({ message: "Session found", user: user.username, id: user._id });
+      res.json({
+        message: "Session found",
+        user: user.username,
+        id: user._id,
+        image: userInfo.picture,
+      });
     } else {
       res.json({ message: "Session not found" });
     }
