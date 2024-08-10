@@ -59,9 +59,22 @@ async function createMainServer() {
 
         if (!user) {
           // If user does not exist, create a new user record
+          let handle;
+          chars = "0123456789";
+          while (true) {
+            handle = "";
+            for (i = 0; i < 8; i++) {
+              handle += chars.charAt(Math.floor(Math.random() * 10));
+            }
+            let hasHandle = await User.findOne({ handle });
+            if (!hasHandle) {
+              break;
+            }
+          }
           user = new User({
             auth0Id: userInfo.sub, // Auth0 user ID
             username: userInfo.nickname || userInfo.name || userInfo.email,
+            handle,
           });
 
           await user.save();
