@@ -15,7 +15,7 @@ export default function Dashboard() {
   const chatRef = useRef(null);
   const addUserRef = useRef(null);
   const gcName = useRef(null);
-  const socket = useSocket("https://tcdy2l-5000.csb.app/");
+  const socket = useSocket(import.meta.env.SOCKET_PORT);
 
   async function addGroupChat() {
     let groupChatName = gcName.current.value;
@@ -49,15 +49,12 @@ export default function Dashboard() {
         window.location.href = "/login";
       } else {
         setUserName(res.user);
+        localStorage.setItem("id", res.id);
 
-        const resGroupChats = await fetch("/api/getGroupChats", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id: localStorage.getItem("id") }),
-        });
+        const resGroupChats = await fetch("/api/getGroupChats");
         const data = await resGroupChats.json();
+
+        console.log(data);
         setGroupChats(data.groupChats);
         setCurrentChat((chat) => data.groupChats[0]);
         setLoading(false);
@@ -85,7 +82,6 @@ export default function Dashboard() {
   function sendMessage(id) {
     const message = textAreaRef.current.value;
     if (!message) return;
-
     if (socket) {
       socket.emit("message", {
         message,
@@ -120,6 +116,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (socket) {
+      socket.emit("join", localStorage.getItem("id"));
       console.log("socket connected");
       socket.on("message", (data) => {
         const { chatId, message, name } = data;
