@@ -65,8 +65,8 @@ module.exports = {
         }
         let missedUsers = [];
         let addUser = false;
-        for (username of users) {
-          let founduser = await User.findOne({ username: username });
+        for (handle of users) {
+          let founduser = await User.findOne({ handle });
           if (founduser) {
             if (!chat.users.includes(founduser._id)) {
               addUser = true;
@@ -76,7 +76,7 @@ module.exports = {
               await founduser.save();
             }
           } else {
-            missedUsers.push(username);
+            missedUsers.push(handle);
           }
         }
         chat.markModified("users");

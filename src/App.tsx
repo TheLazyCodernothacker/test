@@ -24,6 +24,7 @@ const Home = lazy(() => import("./Home"));
 const Login = lazy(() => import("./Login"));
 const Signup = lazy(() => import("./Signup"));
 const Dashboard = lazy(() => import("./Dashboard"));
+const Profile = lazy(() => import("./Profile"));
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -37,19 +38,20 @@ const router = createBrowserRouter(
           </Suspense>
         }
       />
-      <Route
-        path="/signup"
-        element={
-          <Suspense fallback={<Loader />}>
-            <Signup />
-          </Suspense>
-        }
-      />
+
       <Route
         path="/dashboard"
         element={
           <Suspense fallback={<Loader />}>
             <Dashboard />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <Suspense fallback={<Loader />}>
+            <Profile />
           </Suspense>
         }
       />

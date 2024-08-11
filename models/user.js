@@ -17,6 +17,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  info: {
+    type: String,
+    required: true,
+    default: "I'm an NPC and haven't added an interesting info yet.",
+  },
 });
 
 module.exports = mongoose.model("FeatherChatUser", userSchema);

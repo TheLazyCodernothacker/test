@@ -171,7 +171,7 @@ export default function Dashboard() {
         {showModal && (
           <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
             <div className="bg-white p-4 rounded-lg relative">
-              <h1 className="text-xl">Add User(s)</h1>
+              <h1 className="text-xl">Add User(s) by handle</h1>
               <input
                 type="text"
                 placeholder="coolguy,nerd1234,etc."
@@ -235,14 +235,14 @@ export default function Dashboard() {
             <div className="flex flex-col h-full">
               <div
                 style={{ height: "12%" }}
-                className="bg-sky-500 text-white flex items-center p-4"
+                className="bg-sky-500 text-white flex items-center p-4 text-xl"
               >
                 {currentChat.name}
                 <button
-                  className="ml-auto py-1 px-2 bg-sky-600"
+                  className="ml-auto py-1 px-3 text-lg rounded bg-sky-600"
                   onClick={() => setShowModal(true)}
                 >
-                  Add User
+                  Add Users
                 </button>
               </div>
               <div

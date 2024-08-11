@@ -36,7 +36,7 @@ export default function Navbar() {
           <a
             onClick={() => {
               localStorage.removeItem("id");
-              window.location.href = "/login";
+              window.location.href = "/logout";
             }}
             className=" text-white text-xl  bg-sky-800 px-4 py-2 rounded cursor-pointer"
           >
@@ -52,7 +52,7 @@ export default function Navbar() {
             Login
           </a>
           <a
-            href="/signup"
+            href="/login"
             className=" text-white text-xl  bg-sky-800 px-4 py-2 rounded"
           >
             Signup

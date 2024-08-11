@@ -21,7 +21,7 @@ async function createMainServer() {
   const config = {
     authRequired: false,
     auth0Logout: true,
-    secret: "a long, randomly-generated string stored in env",
+    secret: "a long, randomly-generated asdf stored in env",
     baseURL: process.env.BASE_URL,
     clientID: "cDYMVSGg1OSuLJLV8YkeM3whKvERL2OW",
     issuerBaseURL: "https://feather-chat.us.auth0.com",
@@ -38,11 +38,8 @@ async function createMainServer() {
     res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
   });
 
-  app.get("/callback", (req, res) => {
-    console.log("oh my skibidi");
-  });
-
   app.get("/logout", (req, res) => {
+    console.log(12);
     res.oidc.logout();
   });
 
@@ -51,7 +48,6 @@ async function createMainServer() {
   app.use(async (req, res, next) => {
     if (req.oidc.isAuthenticated()) {
       const userInfo = req.oidc.user;
-      console.log(userInfo);
 
       try {
         // Check if the user already exists in MongoDB
@@ -151,9 +147,45 @@ async function createMainServer() {
         user: user.username,
         id: user._id,
         image: userInfo.picture,
+        info: user.info,
+        handle: user.handle,
       });
     } else {
       res.json({ message: "Session not found" });
+    }
+  });
+
+  app.post("/api/updateUser", async (req, res) => {
+    const userInfo = req.oidc.user;
+    if (!req.oidc.isAuthenticated()) {
+      return;
+    }
+    const user = await User.findOne({ auth0id: userInfo.auth0id });
+    if (!user) {
+      res.status(400);
+      res.json({ message: "User not found" });
+      return;
+    } else {
+      let { username, info, image, handle } = req.body;
+      let duplicateHandle = await User.findOne({ handle });
+      if (duplicateHandle) {
+        res.status(400);
+        res.json({ message: "Handle already taken" });
+        return;
+      } else {
+        user.username = username;
+        user.info = info;
+        user.image = image;
+        user.handle = handle;
+        try {
+          await user.save();
+          res.json({ message: "Success" });
+        } catch (e) {
+          console.log(e);
+          res.status(500);
+          res.json({ message: "Internal server error" });
+        }
+      }
     }
   });
 
