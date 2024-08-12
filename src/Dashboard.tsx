@@ -9,7 +9,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [currentChat, setCurrentChat] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [userName, setUserName] = useState("");
+  const [user, setUser] = useState(null);
   const [message, setMessage] = useState("");
   const textAreaRef = useRef(null);
   const chatRef = useRef(null);
@@ -48,7 +48,8 @@ export default function Dashboard() {
       if (res.message === "Session not found") {
         window.location.href = "/login";
       } else {
-        setUserName(res.user);
+        setUser(res);
+        console.log(res);
         localStorage.setItem("id", res.id);
 
         const resGroupChats = await fetch("/api/getGroupChats");
@@ -79,6 +80,10 @@ export default function Dashboard() {
     };
   }, [currentChat]);
 
+  useEffect(() => {
+    console.log(currentChat);
+  }, [currentChat]);
+
   function sendMessage(id) {
     const message = textAreaRef.current.value;
     if (!message) return;
@@ -87,6 +92,7 @@ export default function Dashboard() {
         message,
         id: localStorage.getItem("id"),
         chatId: id,
+        handle: user.handle,
       });
       textAreaRef.current.value = "";
     }
@@ -97,7 +103,8 @@ export default function Dashboard() {
       if (chat) {
         chat.messages.push({
           message,
-          name: userName,
+          name: user.user,
+          handle: user.handle,
         });
       }
       return groupChatsCopy;
@@ -119,7 +126,8 @@ export default function Dashboard() {
       socket.emit("join", localStorage.getItem("id"));
       console.log("socket connected");
       socket.on("message", (data) => {
-        const { chatId, message, name } = data;
+        console.log(data);
+        const { chatId, message, name, handle } = data;
 
         setGroupChats((prevGroupChats) => {
           const groupChatsCopy = [...prevGroupChats];
@@ -128,6 +136,7 @@ export default function Dashboard() {
             chat.messages.push({
               message,
               name,
+              handle: handle,
             });
           }
           return groupChatsCopy;
@@ -256,14 +265,14 @@ export default function Dashboard() {
                       key={i}
                       style={{ maxWidth: "50%", minWidth: "10rem" }}
                       className={`${
-                        message.name === userName
+                        message.handle === user.handle
                           ? "bg-sky-500 text-white block ml-auto"
                           : "bg-gray-200 text-black block mr-auto"
                       } px-4 rounded-lg py-2`}
                     >
                       <h3
                         className={`text-sm mb-0 ${
-                          message.name === userName
+                          message.handle === user.handle
                             ? "text-gray-600"
                             : "text-gray-700"
                         }`}

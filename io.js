@@ -23,7 +23,7 @@ module.exports = {
       });
 
       socket.on("message", async (data) => {
-        const { message, id, chatId } = data;
+        const { message, id, chatId, handle } = data;
         const user = await User.findById(id);
         if (!user) {
           return;
@@ -35,17 +35,21 @@ module.exports = {
         chat.messages.push({
           message,
           name: user.username,
+          handle,
         });
+        const messagesender = user.username;
         chat.users.forEach((user) => {
           if (connectedUsers[user.toString()] && user.toString() !== id) {
             console.log(
               "sending message to " + connectedUsers[user],
               socket.id
             );
+
             io.to(connectedUsers[user]).emit("message", {
               chatId,
-              name: user.username,
+              name: messagesender,
               message,
+              handle,
             });
           }
         });
@@ -73,6 +77,7 @@ module.exports = {
               console.log("adding user to chat");
               chat.users.push(founduser._id.toString());
               founduser.groupchats.push(chat._id);
+              console.log(founduser.groupchats);
               await founduser.save();
             }
           } else {

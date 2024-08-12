@@ -140,7 +140,7 @@ async function createMainServer() {
       res.json({ message: "Session not found" });
       return;
     }
-    let user = await User.findOne({ id: userInfo._id });
+    let user = await User.findOne({ auth0Id: userInfo.sub });
     if (user) {
       res.json({
         message: "Session found",
@@ -160,7 +160,7 @@ async function createMainServer() {
     if (!req.oidc.isAuthenticated()) {
       return;
     }
-    const user = await User.findOne({ auth0id: userInfo.auth0id });
+    const user = await User.findOne({ auth0Id: userInfo.sub });
     if (!user) {
       res.status(400);
       res.json({ message: "User not found" });
@@ -195,13 +195,14 @@ async function createMainServer() {
       return;
     }
     const { name } = req.body;
-    let user = await User.findOne({ auth0id: userInfo.auth0id });
-    const id = user._id;
+    let user = await User.findOne({ auth0Id: userInfo.sub });
+
     if (!user) {
       res.status(400);
       res.json({ message: "User not found" });
       return;
     }
+    const id = user._id;
     const foundchat = await Chat.findOne({ name });
     if (foundchat) {
       res.status(400);
@@ -214,6 +215,8 @@ async function createMainServer() {
       name,
     });
     chat.save().then(() => {
+      console.log("Chat created");
+      console.log(user.username);
       user.groupchats.push(chat._id);
       user.save().then(() => {
         res.json({ message: "Group chat created" });
@@ -227,7 +230,7 @@ async function createMainServer() {
     if (!req.oidc.isAuthenticated()) {
       return;
     }
-    let user = await User.findOne({ auth0id: userInfo.auth0id });
+    let user = await User.findOne({ auth0Id: userInfo.sub });
     if (!user) {
       res.status(400);
       res.json({ message: "User not found" });
