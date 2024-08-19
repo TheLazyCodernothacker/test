@@ -10,6 +10,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const { auth } = require("express-openid-connect");
 require("dotenv").config();
+const compression = require("compression");
 
 const port = 5000;
 
@@ -32,6 +33,7 @@ async function createMainServer() {
 
   // auth router attaches /login, /logout, and /callback routes to the baseURL
   app.use(auth(config));
+  app.use(compression());
 
   // req.isAuthenticated is provided from the auth router
   app.get("/check", (req, res) => {
