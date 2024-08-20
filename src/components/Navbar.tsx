@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import useSession from "../hooks/useSession";
 import "../App.css";
+import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -27,12 +28,11 @@ export default function Navbar() {
           <a href="/profile">
             <img src={image} className="h-10 rounded-full" />
           </a>
-          <a
-            href="dashboard"
-            className=" text-white text-xl  bg-sky-700 px-4 py-2 rounded cursor-pointer"
+          <Button
+          // href="dashboard"
           >
             Dashboard
-          </a>
+          </Button>
           <a
             onClick={() => {
               localStorage.removeItem("id");
