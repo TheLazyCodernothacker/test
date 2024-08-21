@@ -1,5 +1,8 @@
 import useSession from "./hooks/useSession";
 import { useEffect, useState, useRef } from "react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -73,7 +76,7 @@ export default function Profile() {
             <h1 className="text-4xl">Edit User Info</h1>
             <form className="mt-4" onSubmit={submit}>
               <h1 className="text-xl my-2">Username:</h1>
-              <input
+              <Input
                 type="text"
                 placeholder={user.user}
                 defaultValue={user.user}
@@ -81,7 +84,7 @@ export default function Profile() {
                 className="w-full p-2 border rounded"
               />
               <h1 className="text-xl my-2">Handle:</h1>
-              <input
+              <Input
                 type="text"
                 placeholder={user.handle}
                 defaultValue={user.handle}
@@ -90,7 +93,7 @@ export default function Profile() {
               />
               <h1 className="text-xl my-2">Image URL:</h1>
 
-              <input
+              <Input
                 type="text"
                 placeholder={user.image}
                 defaultValue={user.image}
@@ -99,15 +102,13 @@ export default function Profile() {
               />
               <h1 className="text-xl my-2">About me:</h1>
 
-              <textarea
+              <Textarea
                 placeholder={user.info}
                 defaultValue={user.info}
                 className="w-full p-2 border rounded mt-2"
                 ref={infoRef}
-              ></textarea>
-              <button className="w-full p-2 bg-sky-500 text-white mt-2 rounded">
-                Submit
-              </button>
+              ></Textarea>
+              <Button className="w-full  mt-2 rounded">Submit</Button>
             </form>
           </div>
         </>

@@ -21,10 +21,7 @@ export default function Navbar() {
     });
   }, []);
   return (
-    <nav
-      className=" flex p-4 gap-4 items-center bg-secondary"
-      
-    >
+    <nav className=" flex p-4 py-3 gap-4 items-center bg-secondary/50">
       <h1 className="text-white text-xl px-3 py-2">Feather Chat</h1>
       {loggedIn ? (
         <div className="ml-auto flex gap-4">
