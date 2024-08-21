@@ -21,7 +21,10 @@ export default function Navbar() {
     });
   }, []);
   return (
-    <nav className="bg-sky-600 flex p-4 gap-4 items-center">
+    <nav
+      className=" flex p-4 gap-4 items-center bg-secondary"
+      
+    >
       <h1 className="text-white text-xl px-3 py-2">Feather Chat</h1>
       {loggedIn ? (
         <div className="ml-auto flex gap-4">
@@ -29,34 +32,38 @@ export default function Navbar() {
             <img src={image} className="h-10 rounded-full" />
           </a>
           <Button
-          // href="dashboard"
+            onClick={() => {
+              window.location = "/dashboard";
+            }}
+            variant={"outline"}
+            size={"default"}
           >
             Dashboard
           </Button>
-          <a
+          <Button
             onClick={() => {
               localStorage.removeItem("id");
               window.location.href = "/logout";
             }}
-            className=" text-white text-xl  bg-sky-800 px-4 py-2 rounded cursor-pointer"
+            variant={"default"}
+            size={"default"}
           >
             Logout
-          </a>
+          </Button>
         </div>
       ) : (
         <>
-          <a
-            href="/login"
-            className="ml-auto text-white text-xl  bg-sky-700 px-4 py-2 rounded"
+          <Button
+            onClick={() => (window.location = "/login")}
+            className="ml-auto"
+            variant={"outline"}
+            size={"default"}
           >
             Login
-          </a>
-          <a
-            href="/login"
-            className=" text-white text-xl  bg-sky-800 px-4 py-2 rounded"
-          >
+          </Button>
+          <Button onClick={() => (window.location = "/login")} size={"default"}>
             Signup
-          </a>
+          </Button>
         </>
       )}
     </nav>

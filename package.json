@@ -4,6 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@hookform/resolvers": "^3.9.0",
+    "@radix-ui/react-dialog": "^1.1.1",
+    "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@sendgrid/mail": "^8.1.3",
     "body-parser": "^1.20.2",
@@ -21,12 +24,14 @@
     "nodemon": "2.0.19",
     "passport": "^0.7.0",
     "passport-magic-link": "^2.1.1",
+    "react-hook-form": "^7.52.2",
     "react-markdown": "^9.0.1",
     "react-router-dom": "^6.26.0",
     "socket.io": "4.5.1",
     "sort-by": "^1.2.0",
     "tailwind-merge": "^2.5.2",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.23.8"
   },
   "scripts": {
     "start": "nodemon --ignore ./src index.js"

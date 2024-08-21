@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import Logo from "./Logo_square.png";
+import { Button } from "@/components/ui/button";
 
 import "./App.css";
 
@@ -20,22 +21,29 @@ function App() {
   return (
     <>
       <main
-        className="px-8 flex items-center flex-col flex-wrap
+        className="px-8 
       "
+        style={{ minHeight: "80vh" }}
       >
-        <div className="w-2/3 flex items-center flex-wrap my-6 justify-center">
-          <img src={Logo} className="w-48"></img>
-          <h1 className="text-8xl">Feather Chat</h1>
+        <div className=" md:flex  md:flex-wrap my-6 ">
+          <div className="min-h-96 flex items-center p-6 md:w-2/3">
+            <div style={{ maxWidth: "500px" }}>
+              <h1 className="text-6xl">Feather Chat</h1>
+              <p className="mt-4 text-2xl ">
+                A neat chatting app with a simple signup to get you chatting
+                with your friends in no time!
+              </p>
+              <a href="/login">
+                <Button size="lg" className="mt-6" variant={"secondary"}>
+                  Get Started!
+                </Button>
+              </a>
+            </div>
+          </div>
+          <div className="flex justify-center items-center md:w-1/3">
+            <img className="w-2/3" src={Logo}></img>
+          </div>
         </div>
-        <p className="mt-4 text-3xl w-2/3 text-center">
-          Feather Chat is a neat chatting app with a simple signup to get you
-          chatting with your friends in no time!
-        </p>
-        <a href="/signup">
-          <button className="px-4 py-2 rounded bg-sky-600 text-white text-2xl mb-16 mt-6">
-            Get started
-          </button>
-        </a>
       </main>
     </>
   );

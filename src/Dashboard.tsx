@@ -3,6 +3,27 @@ import useSession from "./hooks/useSession";
 import useSocket from "./hooks/useSocket";
 import ReactMarkdown from "react-markdown";
 import { text } from "stream/consumers";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogClose,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function Dashboard() {
   const [groupChats, setGroupChats] = useState([]);
@@ -177,47 +198,24 @@ export default function Dashboard() {
   return (
     <>
       <div className="flex relative" style={{ height: "80vh" }}>
-        {showModal && (
-          <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-4 rounded-lg relative">
-              <h1 className="text-xl">Add User(s) by handle</h1>
-              <input
-                type="text"
-                placeholder="coolguy,nerd1234,etc."
-                className="p-1 mt-4 rounded-lg w-full bg-gray-200 text-black  text-md px-3"
-                ref={addUserRef}
-              />
-              <button
-                className="bg-sky-500 text-white px-3 py-1 rounded-lg mt-4"
-                onClick={addUser}
-              >
+        <div className="w-1/4  p-6 flex flex-col  overflow-y-scroll">
+          <Card className="mb-2">
+            <CardHeader>
+              <CardTitle>Create Group Chat</CardTitle>
+              <CardDescription>
+                Create a chat with a unique name and add users later
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Input placeholder="Chat name" ref={gcName} />
+            </CardContent>
+            <CardFooter>
+              <Button size={"default"} onClick={addGroupChat}>
                 Add
-              </button>
-              <button
-                className="bg-gray-200 px-3 py-1 rounded-lg mt-4 ml-2"
-                onClick={() => setShowModal(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
-        <div className="w-1/4 bg-sky-500 p-6 flex flex-col  overflow-y-scroll">
-          <div className="rounded p-4 bg-sky-600 mb-6">
-            <h1 className="text-white mb-4 text-xl">Create Group Chat</h1>
-            <input
-              type="text"
-              placeholder="Group Chat Name"
-              ref={gcName}
-              className="p-2 rounded-lg w-full bg-sky-500 text-white placeholder:text-white text-md px-4"
-            />
-            <button
-              className="bg-sky-500 text-white px-2 py-1 rounded-lg mt-2"
-              onClick={addGroupChat}
-            >
-              Create
-            </button>
-          </div>
+              </Button>
+            </CardFooter>
+          </Card>
+
           {loading ? (
             <h1 className="text-white p-2">Loading...</h1>
           ) : !groupChats.length ? (
@@ -226,8 +224,8 @@ export default function Dashboard() {
             groupChats.map((chat, i) => (
               <div
                 className={
-                  "flex justify-between items-center p-2 px-4 bg-sky-400 rounded-lg my-2 hover:bg-sky-600 cursor-pointer transition-all duration-200 " +
-                  (currentChat?._id === chat._id ? "bg-sky-600" : "")
+                  "flex justify-between items-center p-2 px-4 bg-secondary  hover:bg-secondary/40 rounded-lg my-2  cursor-pointer transition-all duration-200 " +
+                  (currentChat?._id === chat._id ? "bg-secondary/40" : "")
                 }
                 key={i}
                 onClick={() => setCurrentChat((pastChat) => chat)}
@@ -242,17 +240,29 @@ export default function Dashboard() {
             <h1>Loading...</h1>
           ) : currentChat ? (
             <div className="flex flex-col h-full">
-              <div
-                style={{ height: "12%" }}
-                className="bg-sky-500 text-white flex items-center p-4 text-xl"
-              >
-                {currentChat.name}
-                <button
-                  className="ml-auto py-1 px-3 text-lg rounded bg-sky-600"
-                  onClick={() => setShowModal(true)}
-                >
-                  Add Users
-                </button>
+              <div className=" text-white flex items-center p-4 ">
+                <h1>{currentChat.name}</h1>
+
+                <Dialog>
+                  <DialogTrigger className="ml-auto">
+                    <Button size={"sm"} className="text-lg">
+                      Add Users
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <h1 className="text-xl">Add User(s) by handle</h1>
+                    <Input
+                      type="text"
+                      placeholder="coolguy,nerd1234,etc."
+                      ref={addUserRef}
+                    />
+                    <DialogFooter>
+                      <DialogClose>
+                        <Button onClick={addUser}>Add</Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
               <div
                 style={{ height: "80%" }}
@@ -266,7 +276,7 @@ export default function Dashboard() {
                       style={{ maxWidth: "50%", minWidth: "10rem" }}
                       className={`${
                         message.handle === user.handle
-                          ? "bg-sky-500 text-white block ml-auto"
+                          ? "bg-gray-400 text-black block ml-auto"
                           : "bg-gray-200 text-black block mr-auto"
                       } px-4 rounded-lg py-2`}
                     >
@@ -287,20 +297,33 @@ export default function Dashboard() {
                   <h1>No messages</h1>
                 )}
               </div>
-              <div className="relative" style={{ height: "10%" }}>
-                <textarea
-                  className="p-2 w-full  bg-gray-200 text-md px-4 h-full"
+              <div className="relative mb-2" style={{ height: "10%" }}>
+                <Textarea
                   placeholder="Send your wisdom"
                   ref={textAreaRef}
+                  className="overflow-x-scroll h-full border-box min-h-0"
                 />
-                <button
-                  className="absolute right-0 z-20 top-0 h-full bg-sky-500 aspect-square"
+                <Button
+                  className="absolute right-0 z-20 top-0 h-full aspect-square"
                   onClick={() => {
                     sendMessage(currentChat._id);
                   }}
                 >
-                  Send
-                </button>
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 15 15"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M7.14645 2.14645C7.34171 1.95118 7.65829 1.95118 7.85355 2.14645L11.8536 6.14645C12.0488 6.34171 12.0488 6.65829 11.8536 6.85355C11.6583 7.04882 11.3417 7.04882 11.1464 6.85355L8 3.70711L8 12.5C8 12.7761 7.77614 13 7.5 13C7.22386 13 7 12.7761 7 12.5L7 3.70711L3.85355 6.85355C3.65829 7.04882 3.34171 7.04882 3.14645 6.85355C2.95118 6.65829 2.95118 6.34171 3.14645 6.14645L7.14645 2.14645Z"
+                      fill="currentColor"
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                </Button>
               </div>
             </div>
           ) : (

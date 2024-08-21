@@ -25,6 +25,7 @@ const Login = lazy(() => import("./Login"));
 const Signup = lazy(() => import("./Signup"));
 const Dashboard = lazy(() => import("./Dashboard"));
 const Profile = lazy(() => import("./Profile"));
+import { ThemeProvider } from "./components/ThemeProvider";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -61,11 +62,11 @@ const router = createBrowserRouter(
 
 function App({ routes }) {
   return (
-    <>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <Navbar />
       <RouterProvider router={router} />
       <Footer />
-    </>
+    </ThemeProvider>
   );
 }
 
