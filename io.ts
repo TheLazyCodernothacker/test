@@ -5,6 +5,8 @@ import User from "./models/user";
 
 import Chat from "./models/chat";
 
+import { ChatType, MessageType, UserType } from "./types";
+
 interface connectedUser {
   [key: string]: string;
 }
@@ -27,37 +29,53 @@ const createIOServer = (server: any) => {
       console.log(connectedUsers);
     });
 
-    socket.on("message", async (data) => {
-      const { message, id, chatId, handle } = data;
-      const user = await User.findById(id);
-      if (!user) {
-        return;
-      }
-      const chat = await Chat.findById(chatId);
-      if (!chat) {
-        return;
-      }
-      chat.messages.push({
-        message,
-        name: user.username,
-        handle,
-      });
-      const messagesender = user.username;
-      chat.users.forEach((user: string) => {
-        if (connectedUsers[user.toString()] && user.toString() !== id) {
-          console.log("sending message to " + connectedUsers[user], socket.id);
-
-          io.to(connectedUsers[user]).emit("message", {
-            chatId,
-            name: messagesender,
-            message,
-            handle,
-          });
+    socket.on(
+      "message",
+      async (data: {
+        message: string;
+        id: string;
+        chatId: string;
+        handle: string;
+      }) => {
+        const { message, id, chatId, handle } = data;
+        const user = await User.findById(id);
+        if (!user) {
+          return;
         }
-      });
-      chat.markModified("messages");
-      await chat.save();
-    });
+        const chat: ChatType = await Chat.findById(chatId);
+        if (!chat) {
+          return;
+        }
+        chat.messages.push({
+          sender: user,
+          content: message,
+          timestamp: new Date().toISOString(),
+        });
+        const messagesender = user.username;
+        chat.users.forEach((user: UserType) => {
+          console.log(user);
+          if (
+            connectedUsers[user.username.toString()] &&
+            user.username.toString() !== id
+          ) {
+            console.log(
+              "sending message to " + connectedUsers[user.username],
+              socket.id
+            );
+
+            io.to(connectedUsers[user.username]).emit("message", {
+              chatId,
+              name: messagesender,
+              message,
+              handle,
+            });
+          }
+        });
+        // @ts-ignore
+        chat.markModified("messages");
+        await chat.save();
+      }
+    );
 
     socket.on("addUserToChat", async (data) => {
       const { id, chatId, users } = data;
@@ -74,10 +92,10 @@ const createIOServer = (server: any) => {
       for (let handle of users) {
         let founduser = await User.findOne({ handle });
         if (founduser) {
-          if (!chat.users.includes(founduser._id)) {
+          if (!chat.users.includes((a: UserType) => a._id === founduser._id)) {
             addUser = true;
             console.log("adding user to chat");
-            chat.users.push(founduser._id.toString());
+            chat.users.push(founduser);
             founduser.groupchats.push(chat._id);
             console.log(founduser.groupchats);
             await founduser.save();

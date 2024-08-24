@@ -24,7 +24,7 @@ export default function Profile() {
   async function submit(e) {
     e.preventDefault();
     if (
-      user.user == userRef.current.value &&
+      user.username == userRef.current.value &&
       user.handle == handleRef.current.value &&
       user.image == imageRef.current.value &&
       user.info == infoRef.current.value
@@ -67,7 +67,7 @@ export default function Profile() {
               className="h-48 rounded-full"
             />
             <div className="flex flex-col justify-center ml-4">
-              <h1 className="text-3xl">{user.user}</h1>
+              <h1 className="text-3xl">{user.username}</h1>
               <h1 className="text-xl mt-2 text-gray-600">{user.handle}</h1>
               <h1 className="text-xl mt-6">{user.info}</h1>
             </div>
@@ -78,8 +78,8 @@ export default function Profile() {
               <h1 className="text-xl my-2">Username:</h1>
               <Input
                 type="text"
-                placeholder={user.user}
-                defaultValue={user.user}
+                placeholder={user.username}
+                defaultValue={user.username}
                 ref={userRef}
                 className="w-full p-2 border rounded"
               />

@@ -12,6 +12,7 @@ import bodyParser from "body-parser";
 import { auth, ConfigParams } from "express-openid-connect";
 import dotenv from "dotenv";
 import compression from "compression";
+import { UserType, ChatType, MessageType } from "./types";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -56,7 +57,7 @@ async function createMainServer() {
 
       try {
         // Check if the user already exists in MongoDB
-        let user = await User.findOne({ auth0Id: userInfo?.sub });
+        let user: UserType = await User.findOne({ auth0Id: userInfo?.sub });
 
         if (!user) {
           // If user does not exist, create a new user record
@@ -98,45 +99,6 @@ async function createMainServer() {
   } catch (error) {
     console.error(error);
   }
-  // app.post("/api/signup", async (req, res) => {
-  //   const { username, password } = req.body;
-  //   let users = await User.find();
-  //   console.log(users);
-  //   const user = await User.findOne({ username });
-
-  //   if (user) {
-  //     console.log("User already exists");
-  //     res.status(400);
-  //     res.json({ message: "User already exists" });
-  //     return;
-  //   }
-  //   try {
-  //     const user = new User({
-  //       username,
-  //       password,
-  //     });
-  //     user.save().then(() => {
-  //       console.log("User saved");
-  //       res.json({ message: "User saved" });
-  //     });
-  //   } catch (error) {
-  //     res.status(500);
-  //     console.error(error);
-  //     res.json({ message: "Internal server error" });
-  //   }
-  // });
-
-  // app.post("/api/login", async (req, res) => {
-  //   const { username, password } = req.body;
-  //   const user = await User.findOne({ username, password });
-  //   console.log(user);
-  //   if (user) {
-  //     res.json({ message: "Logged in", id: user._id });
-  //   } else {
-  //     res.status(400);
-  //     res.json({ message: "User not found" });
-  //   }
-  // });
 
   app.get("/api/checkSession", async (req, res) => {
     const userInfo = req.oidc.user;
@@ -145,15 +107,16 @@ async function createMainServer() {
       res.json({ message: "Session not found" });
       return;
     }
-    let user = await User.findOne({ auth0Id: userInfo?.sub });
+    let user: UserType = await User.findOne({ auth0Id: userInfo?.sub });
     if (user) {
       res.json({
         message: "Session found",
-        user: user.username,
+        username: user.username,
         id: user._id,
         image: userInfo?.picture || userInfo?.image,
         info: user.info,
         handle: user.handle,
+        auth0Id: user.auth0Id,
       });
     } else {
       res.json({ message: "Session not found" });
@@ -165,14 +128,14 @@ async function createMainServer() {
     if (!req.oidc.isAuthenticated()) {
       return;
     }
-    const user = await User.findOne({ auth0Id: userInfo?.sub });
+    const user: UserType = await User.findOne({ auth0Id: userInfo?.sub });
     if (!user) {
       res.status(400);
       res.json({ message: "User not found" });
       return;
     } else {
       let { username, info, image, handle } = req.body;
-      let duplicateHandle = await User.findOne({ handle });
+      let duplicateHandle: UserType = await User.findOne({ handle });
       if (duplicateHandle) {
         res.status(400);
         res.json({ message: "Handle already taken" });
@@ -200,7 +163,7 @@ async function createMainServer() {
       return;
     }
     const { name } = req.body;
-    let user = await User.findOne({ auth0Id: userInfo?.sub });
+    let user: UserType = await User.findOne({ auth0Id: userInfo?.sub });
 
     if (!user) {
       res.status(400);
@@ -208,14 +171,14 @@ async function createMainServer() {
       return;
     }
     const id = user._id;
-    const foundchat = await Chat.findOne({ name });
+    const foundchat: ChatType = await Chat.findOne({ name });
     if (foundchat) {
       res.status(400);
       res.json({ message: "Chat with that name already exists" });
       return;
     }
-    let chat = new Chat({
-      users: [id],
+    let chat: ChatType = new Chat({
+      users: [user],
       author: id,
       name,
     });
@@ -231,19 +194,18 @@ async function createMainServer() {
 
   app.get("/api/getGroupChats", async (req, res) => {
     const userInfo = req.oidc.user;
-    console.log(123123);
     if (!req.oidc.isAuthenticated()) {
       return;
     }
-    let user = await User.findOne({ auth0Id: userInfo?.sub });
+    let user: UserType = await User.findOne({ auth0Id: userInfo?.sub });
     if (!user) {
       res.status(400);
       res.json({ message: "User not found" });
       return;
     }
-    let groupChats = [];
+    let groupChats: ChatType[] = [];
     for (let chat of user.groupchats) {
-      let foundchat = await Chat.findById(chat);
+      let foundchat: ChatType = await Chat.findOne({ _id: chat });
       if (foundchat) {
         groupChats.push(foundchat);
       } else {

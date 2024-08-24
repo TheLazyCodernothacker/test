@@ -31,21 +31,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { UserClientType, UserType, ChatType } from "types";
 
 export default function Dashboard() {
-  const [groupChats, setGroupChats] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [currentChat, setCurrentChat] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [user, setUser] = useState(null);
+  const [groupChats, setGroupChats] = useState<ChatType[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [currentChat, setCurrentChat] = useState<ChatType | null>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [user, setUser] = useState<UserClientType | null>(null);
   const textAreaRef = useRef(null);
   const chatRef = useRef(null);
   const addUserRef = useRef(null);
   const gcName = useRef(null);
+  // @ts-ignore
   const socket = useSocket(import.meta.env.BASE_URL);
 
   async function addGroupChat() {
-    let groupChatName = gcName.current.value;
+    let groupChatName = gcName?.current?.value;
     if (groupChatName.length < 3) {
       alert("Group Chat Name must be at least 3 characters");
       return;
@@ -71,19 +73,19 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchSession = async () => {
-      const res = await useSession();
+      const res: UserClientType = await useSession();
       if (res.message === "Session not found") {
         window.location.href = "/login";
       } else {
         setUser(res);
-        console.log(res);
-        localStorage.setItem("id", res.id);
+        console.log(res, 123);
+        localStorage.setItem("id", res?.id || "");
 
         const resGroupChats = await fetch("/api/getGroupChats");
-        const data = await resGroupChats.json();
+        const data: { groupChats: ChatType[] } = await resGroupChats.json();
 
         setGroupChats(data.groupChats);
-        setCurrentChat((chat) => data.groupChats[0]);
+        setCurrentChat((chat) => data.groupChats[0] || null);
         setLoading(false);
       }
     };
@@ -92,7 +94,7 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter" && currentChat) {
         e.preventDefault();
         sendMessage(currentChat._id);
@@ -110,15 +112,15 @@ export default function Dashboard() {
     console.log(currentChat);
   }, [currentChat]);
 
-  function sendMessage(id) {
-    const message = textAreaRef.current.value;
+  function sendMessage(id: string) {
+    const message = textAreaRef?.current?.value;
     if (!message) return;
     if (socket) {
-      socket.emit("message", {
+      socket?.emit("message", {
         message,
         id: localStorage.getItem("id"),
         chatId: id,
-        handle: user.handle,
+        handle: user?.handle,
       });
       textAreaRef.current.value = "";
     }
@@ -126,11 +128,11 @@ export default function Dashboard() {
     setGroupChats((prevGroupChats) => {
       const groupChatsCopy = [...prevGroupChats];
       const chat = groupChatsCopy.find((chat) => chat._id === id);
-      if (chat) {
+      if (chat && user) {
         chat.messages.push({
-          message,
-          name: user.user,
-          handle: user.handle,
+          sender: user,
+          content: message,
+          timestamp: new Date().toISOString(),
         });
       }
       return groupChatsCopy;
@@ -138,10 +140,10 @@ export default function Dashboard() {
   }
 
   function addUser() {
-    let users = addUserRef.current.value.split(",");
-    socket.emit("addUserToChat", {
+    let users = addUserRef?.current?.value.split(",");
+    socket?.emit("addUserToChat", {
       users,
-      chatId: currentChat._id,
+      chatId: currentChat?._id,
       id: localStorage.getItem("id"),
     });
     setShowModal(false);
@@ -149,32 +151,40 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (socket) {
-      socket.emit("join", localStorage.getItem("id"));
+      socket?.emit("join", localStorage.getItem("id"));
       console.log("socket connected");
-      socket.on("message", (data) => {
-        console.log(data);
-        const { chatId, message, name, handle } = data;
+      socket?.on(
+        "message",
+        (data: {
+          chatId: string;
+          name: string;
+          message: string;
+          handle: string;
+        }) => {
+          console.log(data);
+          const { chatId, message, name, handle } = data;
 
-        setGroupChats((prevGroupChats) => {
-          const groupChatsCopy = [...prevGroupChats];
-          const chat = groupChatsCopy.find((chat) => chat._id === chatId);
-          if (chat) {
-            chat.messages.push({
-              message,
-              name,
-              handle: handle,
-            });
-          }
-          return groupChatsCopy;
-        });
-      });
+          setGroupChats((prevGroupChats) => {
+            const groupChatsCopy = [...prevGroupChats];
+            const chat = groupChatsCopy.find((chat) => chat._id === chatId);
+            if (chat) {
+              chat.messages.push({
+                sender: { username: name },
+                content: message,
+                timestamp: new Date().toISOString(),
+              });
+            }
+            return groupChatsCopy;
+          });
+        }
+      );
 
-      socket.on("usersAdded", (addUser, missedUsers) => {
+      socket.on("usersAdded", (addUser: boolean, missedUsers: string[]) => {
         if (addUser) {
           setGroupChats((prevGroupChats) => {
             const groupChatsCopy = [...prevGroupChats];
             const chat = groupChatsCopy.find(
-              (chat) => chat._id === currentChat._id
+              (chat) => chat._id === currentChat?._id
             );
             if (chat) {
               if (users.length > currentChat.users.length) {
@@ -317,22 +327,22 @@ export default function Dashboard() {
                       key={i}
                       style={{ maxWidth: "50%", minWidth: "10rem" }}
                       className={`${
-                        message.handle === user.handle
+                        message.sender.auth0Id === user?.auth0Id
                           ? "bg-gray-400 text-black block ml-auto"
                           : "bg-gray-200 text-black block mr-auto"
                       } px-4 rounded-lg py-2`}
                     >
                       <h3
                         className={`text-sm mb-0 ${
-                          message.handle === user.handle
+                          message.sender.auth0Id === user?.auth0Id
                             ? "text-gray-600"
                             : "text-gray-700"
                         }`}
                         style={{ marginBottom: "-0.25rem" }}
                       >
-                        {message.name}
+                        {message.sender.username}
                       </h3>
-                      <ReactMarkdown>{message.message}</ReactMarkdown>
+                      <ReactMarkdown>{message.content}</ReactMarkdown>
                     </div>
                   ))
                 ) : (

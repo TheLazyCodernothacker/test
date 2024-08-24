@@ -21,8 +21,6 @@ import Footer from "./components/Footer";
 import Loader from "./components/Loader";
 import { Sign } from "crypto";
 const Home = lazy(() => import("./Home"));
-const Login = lazy(() => import("./Login"));
-const Signup = lazy(() => import("./Signup"));
 const Dashboard = lazy(() => import("./Dashboard"));
 const Profile = lazy(() => import("./Profile"));
 import { ThemeProvider } from "./components/ThemeProvider";
@@ -31,15 +29,6 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       <Route path="/" element={<Home />} />
-      <Route
-        path="/login"
-        element={
-          <Suspense fallback={<Loader />}>
-            <Login />
-          </Suspense>
-        }
-      />
-
       <Route
         path="/dashboard"
         element={
@@ -59,7 +48,7 @@ const router = createBrowserRouter(
     </>
   )
 );
-
+// @ts-ignore
 function App({ routes }) {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
