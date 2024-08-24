@@ -1,16 +1,20 @@
-const express = require("express");
-const http = require("http");
+import express, { Request, Response, NextFunction } from "express";
+import http from "http";
+import { createServer as createViteServer } from "vite";
+import createIOServer from "./io";
+import mongoose from "mongoose";
+// @ts-ignore
+import User from "./models/user";
+// @ts-ignore
+import Chat from "./models/chat";
 
-const { createServer: createViteServer } = require("vite");
-const { createIOServer } = require("./io");
-const mongoose = require("mongoose");
-const User = require("./models/user");
-const Chat = require("./models/chat");
-const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
-const { auth } = require("express-openid-connect");
-require("dotenv").config();
-const compression = require("compression");
+import bodyParser from "body-parser";
+import { auth, ConfigParams } from "express-openid-connect";
+import dotenv from "dotenv";
+import compression from "compression";
+
+// Load environment variables from .env file
+dotenv.config();
 
 const port = 5000;
 
@@ -46,22 +50,21 @@ async function createMainServer() {
   });
 
   app.use(bodyParser.json());
-  app.use(cookieParser());
   app.use(async (req, res, next) => {
     if (req.oidc.isAuthenticated()) {
       const userInfo = req.oidc.user;
 
       try {
         // Check if the user already exists in MongoDB
-        let user = await User.findOne({ auth0Id: userInfo.sub });
+        let user = await User.findOne({ auth0Id: userInfo?.sub });
 
         if (!user) {
           // If user does not exist, create a new user record
           let handle;
-          chars = "0123456789";
+          let chars = "0123456789";
           while (true) {
             handle = "";
-            for (i = 0; i < 8; i++) {
+            for (let i = 0; i < 8; i++) {
               handle += chars.charAt(Math.floor(Math.random() * 10));
             }
             let hasHandle = await User.findOne({ handle });
@@ -70,8 +73,8 @@ async function createMainServer() {
             }
           }
           user = new User({
-            auth0Id: userInfo.sub, // Auth0 user ID
-            username: userInfo.nickname || userInfo.name || userInfo.email,
+            auth0Id: userInfo?.sub, // Auth0 user ID
+            username: userInfo?.nickname || userInfo?.name || userInfo?.email,
             handle,
           });
 
@@ -142,13 +145,13 @@ async function createMainServer() {
       res.json({ message: "Session not found" });
       return;
     }
-    let user = await User.findOne({ auth0Id: userInfo.sub });
+    let user = await User.findOne({ auth0Id: userInfo?.sub });
     if (user) {
       res.json({
         message: "Session found",
         user: user.username,
         id: user._id,
-        image: userInfo.picture,
+        image: userInfo?.picture || userInfo?.image,
         info: user.info,
         handle: user.handle,
       });
@@ -162,7 +165,7 @@ async function createMainServer() {
     if (!req.oidc.isAuthenticated()) {
       return;
     }
-    const user = await User.findOne({ auth0Id: userInfo.sub });
+    const user = await User.findOne({ auth0Id: userInfo?.sub });
     if (!user) {
       res.status(400);
       res.json({ message: "User not found" });
@@ -197,7 +200,7 @@ async function createMainServer() {
       return;
     }
     const { name } = req.body;
-    let user = await User.findOne({ auth0Id: userInfo.sub });
+    let user = await User.findOne({ auth0Id: userInfo?.sub });
 
     if (!user) {
       res.status(400);
@@ -232,19 +235,19 @@ async function createMainServer() {
     if (!req.oidc.isAuthenticated()) {
       return;
     }
-    let user = await User.findOne({ auth0Id: userInfo.sub });
+    let user = await User.findOne({ auth0Id: userInfo?.sub });
     if (!user) {
       res.status(400);
       res.json({ message: "User not found" });
       return;
     }
     let groupChats = [];
-    for (chat of user.groupchats) {
+    for (let chat of user.groupchats) {
       let foundchat = await Chat.findById(chat);
       if (foundchat) {
         groupChats.push(foundchat);
       } else {
-        user.groupchats = user.groupchats.filter((chat) => chat !== chat);
+        user.groupchats = user.groupchats.filter((chat: any) => chat !== chat);
         await user.save();
       }
     }
@@ -258,6 +261,7 @@ async function createMainServer() {
       middlewareMode: true,
       hmr: {
         protocol: "ws",
+        // @ts-ignore
         port: "localhost",
         //if locally remove above and do: server : server
       },
