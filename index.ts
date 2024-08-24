@@ -46,7 +46,6 @@ async function createMainServer() {
   });
 
   app.get("/logout", (req, res) => {
-    console.log(12);
     res.oidc.logout();
   });
 

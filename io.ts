@@ -53,17 +53,16 @@ const createIOServer = (server: any) => {
         });
         const messagesender = user.username;
         chat.users.forEach((user: UserType) => {
-          console.log(user);
           if (
-            connectedUsers[user.username.toString()] &&
-            user.username.toString() !== id
+            connectedUsers[user._id.toString()] &&
+            user._id.toString() !== id
           ) {
             console.log(
-              "sending message to " + connectedUsers[user.username],
+              "sending message to " + connectedUsers[user._id],
               socket.id
             );
 
-            io.to(connectedUsers[user.username]).emit("message", {
+            io.to(connectedUsers[user._id]).emit("message", {
               chatId,
               name: messagesender,
               message,
