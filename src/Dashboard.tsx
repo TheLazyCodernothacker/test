@@ -24,6 +24,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Dashboard() {
   const [groupChats, setGroupChats] = useState([]);
@@ -31,7 +38,6 @@ export default function Dashboard() {
   const [currentChat, setCurrentChat] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [user, setUser] = useState(null);
-  const [message, setMessage] = useState("");
   const textAreaRef = useRef(null);
   const chatRef = useRef(null);
   const addUserRef = useRef(null);
@@ -76,7 +82,6 @@ export default function Dashboard() {
         const resGroupChats = await fetch("/api/getGroupChats");
         const data = await resGroupChats.json();
 
-        console.log(data);
         setGroupChats(data.groupChats);
         setCurrentChat((chat) => data.groupChats[0]);
         setLoading(false);
@@ -235,17 +240,54 @@ export default function Dashboard() {
             ))
           )}
         </div>
-        <div className="w-3/4 overflow-h-scroll">
+        <div className="w-3/4 overflow-h-scroll border-l-8 border-secondary/50 p-4">
           {loading ? (
             <h1>Loading...</h1>
           ) : currentChat ? (
             <div className="flex flex-col h-full">
-              <div className=" text-white flex items-center p-4 ">
+              <div className=" text-white flex items-center px-4  pb-4">
                 <h1>{currentChat.name}</h1>
-
                 <Dialog>
-                  <DialogTrigger className="ml-auto">
-                    <Button size={"sm"} className="text-lg">
+                  <DialogTrigger className="ml-auto ">
+                    <Button
+                      size={"sm"}
+                      variant={"outline"}
+                      className="text-md mr-2"
+                    >
+                      Chat info
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <h1 className="text-xl">{currentChat.name}</h1>
+                    <h2 className="text-lg">Users:</h2>
+                    <div className="flex flex-col gap-2">
+                      {currentChat.users.map((user, i) => (
+                        <div className="flex gap-2 items-center">
+                          <img
+                            className="rounded-full w-8 h-8"
+                            src={user.image}
+                          />
+                          <h3 key={i} className="text-md">
+                            {user.username}
+                          </h3>
+                          <Select>
+                            <SelectTrigger className="ml-auto w-[180px]">
+                              <SelectValue placeholder={user.role} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="light">User</SelectItem>
+                              <SelectItem value="dark">Admin</SelectItem>
+                              <SelectItem value="system">Owner</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      ))}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <Dialog>
+                  <DialogTrigger>
+                    <Button size={"sm"} className="text-md">
                       Add Users
                     </Button>
                   </DialogTrigger>

@@ -17,6 +17,10 @@ const chatSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  description: {
+    type: String,
+    default: "The best chat ever",
+  },
 });
 
 module.exports = mongoose.model("FeatherChatChat", chatSchema);
