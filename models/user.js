@@ -22,6 +22,11 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: "I'm an NPC and haven't added an interesting info yet.",
   },
+  image: {
+    type: String,
+    required: true,
+    default: "https://i.imgur.com/7dIaGg8.png",
+  },
 });
 
 module.exports = mongoose.model("FeatherChatUser", userSchema);

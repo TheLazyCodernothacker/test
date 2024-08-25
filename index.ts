@@ -76,6 +76,7 @@ async function createMainServer() {
             auth0Id: userInfo?.sub, // Auth0 user ID
             username: userInfo?.nickname || userInfo?.name || userInfo?.email,
             handle,
+            image: userInfo?.picture || userInfo?.image,
           });
 
           await user.save();

@@ -31,6 +31,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { UserClientType, UserType, ChatType } from "types";
 
 export default function Dashboard() {
@@ -330,19 +335,47 @@ export default function Dashboard() {
                         message.sender.auth0Id === user?.auth0Id
                           ? "bg-gray-400 text-black block ml-auto"
                           : "bg-gray-200 text-black block mr-auto"
-                      } px-4 rounded-lg py-2`}
+                      } px-4 rounded-lg py-2 `}
                     >
-                      <h3
-                        className={`text-sm mb-0 ${
-                          message.sender.auth0Id === user?.auth0Id
-                            ? "text-gray-600"
-                            : "text-gray-700"
-                        }`}
-                        style={{ marginBottom: "-0.25rem" }}
-                      >
-                        {message.sender.username}
-                      </h3>
-                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                      <div className="flex flex-row items-center">
+                        <HoverCard>
+                          <HoverCardTrigger className="cursor-pointer">
+                            <img
+                              className="rounded-full w-8 h-8 pointer"
+                              src={message.sender.image}
+                            />
+                          </HoverCardTrigger>
+                          <HoverCardContent>
+                            <img
+                              className="rounded-full w-32 h-32 "
+                              src={message.sender.image}
+                            />
+                            <h1 className="text-xl mt-4">
+                              {message.sender.username}
+                            </h1>
+                            <h2 className="text-md text-gray-500">
+                              {message.sender.handle}
+                            </h2>
+                            <p className="text-md mt-2">
+                              {message.sender.info}
+                            </p>
+                          </HoverCardContent>
+                        </HoverCard>
+
+                        <div className=" ml-4">
+                          <h3
+                            className={`text-sm mb-0 ${
+                              message.sender.auth0Id === user?.auth0Id
+                                ? "text-gray-600"
+                                : "text-gray-700"
+                            }`}
+                            style={{ marginBottom: "-0.25rem" }}
+                          >
+                            {message.sender.username}
+                          </h3>
+                          <ReactMarkdown>{message.content}</ReactMarkdown>
+                        </div>
+                      </div>
                     </div>
                   ))
                 ) : (

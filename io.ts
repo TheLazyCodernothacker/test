@@ -5,7 +5,7 @@ import User from "./models/user";
 
 import Chat from "./models/chat";
 
-import { ChatType, MessageType, UserType } from "./types";
+import { ChatType, MessageType, UserClientType, UserType } from "./types";
 
 interface connectedUser {
   [key: string]: string;
@@ -38,7 +38,7 @@ const createIOServer = (server: any) => {
         handle: string;
       }) => {
         const { message, id, chatId, handle } = data;
-        const user = await User.findById(id);
+        const user: UserClientType = await User.findById(id);
         if (!user) {
           return;
         }
@@ -46,8 +46,19 @@ const createIOServer = (server: any) => {
         if (!chat) {
           return;
         }
+        console.log(user);
+
         chat.messages.push({
-          sender: user,
+          sender: {
+            username: user.username,
+            _id: user._id,
+            image: user.image || "",
+            handle: user.handle,
+            groupchats: user.groupchats,
+            info: user.info,
+            auth0Id: user.auth0Id,
+            message: "",
+          },
           content: message,
           timestamp: new Date().toISOString(),
         });
