@@ -165,16 +165,18 @@ export default function Dashboard() {
           name: string;
           message: string;
           handle: string;
+          info: string;
+          image: string;
         }) => {
           console.log(data);
-          const { chatId, message, name, handle } = data;
+          const { chatId, message, name, handle, image, info } = data;
 
           setGroupChats((prevGroupChats) => {
             const groupChatsCopy = [...prevGroupChats];
             const chat = groupChatsCopy.find((chat) => chat._id === chatId);
             if (chat) {
               chat.messages.push({
-                sender: { username: name },
+                sender: { username: name, image, info, handle },
                 content: message,
                 timestamp: new Date().toISOString(),
               });

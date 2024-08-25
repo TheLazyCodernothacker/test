@@ -62,7 +62,7 @@ const createIOServer = (server: any) => {
           content: message,
           timestamp: new Date().toISOString(),
         });
-        const messagesender = user.username;
+        const messagesender = user;
         chat.users.forEach((user: UserType) => {
           if (
             connectedUsers[user._id.toString()] &&
@@ -72,12 +72,14 @@ const createIOServer = (server: any) => {
               "sending message to " + connectedUsers[user._id],
               socket.id
             );
-
+            
             io.to(connectedUsers[user._id]).emit("message", {
               chatId,
-              name: messagesender,
+              name: messagesender.username,
               message,
-              handle,
+              handle: messagesender.handle,
+              image: messagesender.image,
+              info: messagesender.info
             });
           }
         });
