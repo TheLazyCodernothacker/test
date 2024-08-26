@@ -16,7 +16,7 @@ export default function Profile() {
       if (res.message === "Session not found") {
         window.location.href = "/login";
       } else {
-        setUser(res);
+        setUser(res.user);
         setLoading(false);
       }
     });

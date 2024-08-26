@@ -12,7 +12,13 @@ import bodyParser from "body-parser";
 import { auth, ConfigParams } from "express-openid-connect";
 import dotenv from "dotenv";
 import compression from "compression";
-import { UserType, ChatType, MessageType } from "./types";
+import {
+  UserType,
+  ChatType,
+  MessageType,
+  SessionType,
+  UserClientType,
+} from "./types";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -108,16 +114,19 @@ async function createMainServer() {
       return;
     }
     let user: UserType = await User.findOne({ auth0Id: userInfo?.sub });
-    if (user) {
-      res.json({
-        message: "Session found",
+    let returnData: SessionType = {
+      message: "Session found",
+      user: {
         username: user.username,
-        id: user._id,
+        _id: user._id,
         image: userInfo?.picture || userInfo?.image,
         info: user.info,
         handle: user.handle,
         auth0Id: user.auth0Id,
-      });
+      },
+    };
+    if (user) {
+      res.json(returnData);
     } else {
       res.json({ message: "Session not found" });
     }
@@ -178,7 +187,7 @@ async function createMainServer() {
       return;
     }
     let chat: ChatType = new Chat({
-      users: [user],
+      users: [user._id],
       author: id,
       name,
     });
@@ -204,16 +213,25 @@ async function createMainServer() {
       return;
     }
     let groupChats: ChatType[] = [];
+    let requiredUsers: {
+      [key: string]: UserClientType;
+    } = {};
     for (let chat of user.groupchats) {
       let foundchat: ChatType = await Chat.findOne({ _id: chat });
       if (foundchat) {
+        for (let userId of foundchat.users) {
+          if (!requiredUsers[userId]) {
+            const user: UserClientType = await User.findById(userId);
+            requiredUsers[userId] = user;
+          }
+        }
         groupChats.push(foundchat);
       } else {
         user.groupchats = user.groupchats.filter((chat: any) => chat !== chat);
         await user.save();
       }
     }
-    res.json({ groupChats });
+    res.json({ groupChats, requiredUsers });
   });
 
   createIOServer(server);

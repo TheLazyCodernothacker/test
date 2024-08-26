@@ -11,7 +11,7 @@ type UserType = {
 
 type ChatType = {
   messages: MessageType[];
-  users: UserType[];
+  users: string[];
   info: string;
   save: () => Promise<void>;
   name: string;
@@ -19,13 +19,12 @@ type ChatType = {
 };
 
 type MessageType = {
-  sender: UserClientType;
+  sender: string;
   content: string;
   timestamp: string;
 };
 
 type UserClientType = {
-  message: string;
   username?: string;
   _id?: string;
   image?: string;
@@ -35,4 +34,9 @@ type UserClientType = {
   auth0Id?: string;
 };
 
-export type { UserType, ChatType, MessageType, UserClientType };
+type SessionType = {
+  message: string;
+  user?: UserClientType;
+};
+
+export type { UserType, ChatType, MessageType, UserClientType, SessionType };

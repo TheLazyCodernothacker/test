@@ -12,8 +12,8 @@ export default function Navbar() {
     const session = useSession().then((res) => {
       if (res.message !== "Session not found") {
         setLoggedIn(true);
-        if (res.image) {
-          setImage(res.image);
+        if (res.user.image) {
+          setImage(res.user.image);
         }
       } else {
         setLoggedIn(false);
@@ -39,7 +39,7 @@ export default function Navbar() {
           </Button>
           <Button
             onClick={() => {
-              localStorage.removeItem("id");
+              localStorage.removeItem("_id");
               window.location.href = "/logout";
             }}
             variant={"default"}

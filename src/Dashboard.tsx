@@ -36,7 +36,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { UserClientType, UserType, ChatType } from "types";
+import { UserClientType, UserType, ChatType, SessionType } from "types";
 
 export default function Dashboard() {
   const [groupChats, setGroupChats] = useState<ChatType[]>([]);
@@ -44,6 +44,9 @@ export default function Dashboard() {
   const [currentChat, setCurrentChat] = useState<ChatType | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [user, setUser] = useState<UserClientType | null>(null);
+  const [requiredUsers, setRequiredUsers] = useState<{
+    [key: string]: UserClientType;
+  }>({});
   const textAreaRef = useRef(null);
   const chatRef = useRef(null);
   const addUserRef = useRef(null);
@@ -64,7 +67,7 @@ export default function Dashboard() {
       },
       body: JSON.stringify({
         name: groupChatName,
-        id: localStorage.getItem("id"),
+        id: localStorage.getItem("_id"),
       }),
     });
     const data = await res.json();
@@ -78,18 +81,27 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchSession = async () => {
-      const res: UserClientType = await useSession();
+      const res: SessionType = await useSession();
+
       if (res.message === "Session not found") {
         window.location.href = "/login";
       } else {
-        setUser(res);
-        console.log(res, 123);
-        localStorage.setItem("id", res?.id || "");
+        setUser(res.user || null);
+        console.log(res, 232123);
+        localStorage.setItem("_id", res?.user?._id || "");
+        console.log(res.user);
 
         const resGroupChats = await fetch("/api/getGroupChats");
-        const data: { groupChats: ChatType[] } = await resGroupChats.json();
+        const data: {
+          groupChats: ChatType[];
+          requiredUsers: {
+            [key: string]: UserClientType;
+          };
+        } = await resGroupChats.json();
+        console.log(data);
 
         setGroupChats(data.groupChats);
+        setRequiredUsers(data.requiredUsers);
         setCurrentChat((chat) => data.groupChats[0] || null);
         setLoading(false);
       }
@@ -123,25 +135,25 @@ export default function Dashboard() {
     if (socket) {
       socket?.emit("message", {
         message,
-        id: localStorage.getItem("id"),
+        id: localStorage.getItem("_id"),
         chatId: id,
         handle: user?.handle,
       });
       textAreaRef.current.value = "";
     }
 
-    setGroupChats((prevGroupChats) => {
-      const groupChatsCopy = [...prevGroupChats];
-      const chat = groupChatsCopy.find((chat) => chat._id === id);
-      if (chat && user) {
-        chat.messages.push({
-          sender: user,
-          content: message,
-          timestamp: new Date().toISOString(),
-        });
-      }
-      return groupChatsCopy;
-    });
+    // setGroupChats((prevGroupChats) => {
+    //   const groupChatsCopy = [...prevGroupChats];
+    //   const chat = groupChatsCopy.find((chat) => chat._id === id);
+    //   if (chat && user) {
+    //     chat.messages.push({
+    //       sender: user._id as string,
+    //       content: message,
+    //       timestamp: new Date().toISOString(),
+    //     });
+    //   }
+    //   return groupChatsCopy;
+    // });
   }
 
   function addUser() {
@@ -149,34 +161,27 @@ export default function Dashboard() {
     socket?.emit("addUserToChat", {
       users,
       chatId: currentChat?._id,
-      id: localStorage.getItem("id"),
+      id: localStorage.getItem("_id"),
     });
     setShowModal(false);
   }
 
   useEffect(() => {
     if (socket) {
-      socket?.emit("join", localStorage.getItem("id"));
+      socket?.emit("join", localStorage.getItem("_id"));
       console.log("socket connected");
       socket?.on(
         "message",
-        (data: {
-          chatId: string;
-          name: string;
-          message: string;
-          handle: string;
-          info: string;
-          image: string;
-        }) => {
+        (data: { chatId: string; sender: string; message: string }) => {
           console.log(data);
-          const { chatId, message, name, handle, image, info } = data;
+          const { chatId, sender, message } = data;
 
           setGroupChats((prevGroupChats) => {
             const groupChatsCopy = [...prevGroupChats];
             const chat = groupChatsCopy.find((chat) => chat._id === chatId);
             if (chat) {
               chat.messages.push({
-                sender: { username: name, image, info, handle },
+                sender: sender,
                 content: message,
                 timestamp: new Date().toISOString(),
               });
@@ -334,7 +339,7 @@ export default function Dashboard() {
                       key={i}
                       style={{ maxWidth: "50%", minWidth: "10rem" }}
                       className={`${
-                        message.sender.auth0Id === user?.auth0Id
+                        requiredUsers[message.sender]?.auth0Id === user?.auth0Id
                           ? "bg-gray-400 text-black block ml-auto"
                           : "bg-gray-200 text-black block mr-auto"
                       } px-4 rounded-lg py-2 `}
@@ -344,22 +349,22 @@ export default function Dashboard() {
                           <HoverCardTrigger className="cursor-pointer">
                             <img
                               className="rounded-full w-8 h-8 pointer"
-                              src={message.sender.image}
+                              src={requiredUsers[message.sender]?.image}
                             />
                           </HoverCardTrigger>
                           <HoverCardContent>
                             <img
                               className="rounded-full w-32 h-32 "
-                              src={message.sender.image}
+                              src={requiredUsers[message.sender]?.image}
                             />
                             <h1 className="text-xl mt-4">
-                              {message.sender.username}
+                              {requiredUsers[message.sender]?.username}
                             </h1>
                             <h2 className="text-md text-gray-500">
-                              {message.sender.handle}
+                              {requiredUsers[message.sender]?.handle}
                             </h2>
                             <p className="text-md mt-2">
-                              {message.sender.info}
+                              {requiredUsers[message.sender]?.info}
                             </p>
                           </HoverCardContent>
                         </HoverCard>
@@ -367,13 +372,14 @@ export default function Dashboard() {
                         <div className=" ml-4">
                           <h3
                             className={`text-sm mb-0 ${
-                              message.sender.auth0Id === user?.auth0Id
+                              requiredUsers[message.sender]?.auth0Id ===
+                              user?.auth0Id
                                 ? "text-gray-600"
                                 : "text-gray-700"
                             }`}
                             style={{ marginBottom: "-0.25rem" }}
                           >
-                            {message.sender.username}
+                            {requiredUsers[message.sender]?.username}
                           </h3>
                           <ReactMarkdown>{message.content}</ReactMarkdown>
                         </div>

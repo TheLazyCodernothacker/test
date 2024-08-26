@@ -38,6 +38,9 @@ const createIOServer = (server: any) => {
         handle: string;
       }) => {
         const { message, id, chatId, handle } = data;
+        if (!id) {
+          return;
+        }
         const user: UserClientType = await User.findById(id);
         if (!user) {
           return;
@@ -49,37 +52,22 @@ const createIOServer = (server: any) => {
         console.log(user);
 
         chat.messages.push({
-          sender: {
-            username: user.username,
-            _id: user._id,
-            image: user.image || "",
-            handle: user.handle,
-            groupchats: user.groupchats,
-            info: user.info,
-            auth0Id: user.auth0Id,
-            message: "",
-          },
+          sender: user._id as string,
           content: message,
           timestamp: new Date().toISOString(),
         });
         const messagesender = user;
-        chat.users.forEach((user: UserType) => {
-          if (
-            connectedUsers[user._id.toString()] &&
-            user._id.toString() !== id
-          ) {
+        chat.users.forEach((user: string) => {
+          if (connectedUsers[user] && user !== id) {
             console.log(
-              "sending message to " + connectedUsers[user._id],
+              "sending message to " + connectedUsers[user],
               socket.id
             );
-            
-            io.to(connectedUsers[user._id]).emit("message", {
+
+            io.to(connectedUsers[user]).emit("message", {
               chatId,
-              name: messagesender.username,
+              sender: messagesender._id,
               message,
-              handle: messagesender.handle,
-              image: messagesender.image,
-              info: messagesender.info
             });
           }
         });
@@ -102,12 +90,12 @@ const createIOServer = (server: any) => {
       let missedUsers = [];
       let addUser = false;
       for (let handle of users) {
-        let founduser = await User.findOne({ handle });
+        let founduser: UserType = await User.findOne({ handle });
         if (founduser) {
           if (!chat.users.includes((a: UserType) => a._id === founduser._id)) {
             addUser = true;
             console.log("adding user to chat");
-            chat.users.push(founduser);
+            chat.users.push(founduser._id);
             founduser.groupchats.push(chat._id);
             console.log(founduser.groupchats);
             await founduser.save();
