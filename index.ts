@@ -17,7 +17,7 @@ import { UserType, ChatType, MessageType } from "./types";
 // Load environment variables from .env file
 dotenv.config();
 
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 let users = {};
 
