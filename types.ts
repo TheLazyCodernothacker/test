@@ -11,7 +11,10 @@ type UserType = {
 
 type ChatType = {
   messages: MessageType[];
-  users: string[];
+  users: {
+    role: "User" | "Admin" | "Owner" | "Author";
+    _id: string;
+  }[];
   info: string;
   save: () => Promise<void>;
   name: string;

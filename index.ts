@@ -187,7 +187,12 @@ async function createMainServer() {
       return;
     }
     let chat: ChatType = new Chat({
-      users: [user._id],
+      users: [
+        {
+          role: "Author",
+          _id: user._id,
+        },
+      ],
       author: id,
       name,
     });
@@ -219,10 +224,12 @@ async function createMainServer() {
     for (let chat of user.groupchats) {
       let foundchat: ChatType = await Chat.findOne({ _id: chat });
       if (foundchat) {
-        for (let userId of foundchat.users) {
-          if (!requiredUsers[userId]) {
-            const user: UserClientType = await User.findById(userId);
-            requiredUsers[userId] = user;
+        for (let chatUser of foundchat.users) {
+          if (!requiredUsers[chatUser._id.toString()]) {
+            const user: UserClientType = await User.findById(
+              chatUser._id.toString()
+            );
+            requiredUsers[chatUser._id.toString()] = user;
           }
         }
         groupChats.push(foundchat);
@@ -231,6 +238,7 @@ async function createMainServer() {
         await user.save();
       }
     }
+    console.log(requiredUsers);
     res.json({ groupChats, requiredUsers });
   });
 

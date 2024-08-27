@@ -101,6 +101,7 @@ export default function Dashboard() {
         console.log(data);
 
         setGroupChats(data.groupChats);
+        console.log(data.requiredUsers);
         setRequiredUsers(data.requiredUsers);
         setCurrentChat((chat) => data.groupChats[0] || null);
         setLoading(false);
@@ -191,28 +192,56 @@ export default function Dashboard() {
         }
       );
 
-      socket.on("usersAdded", (addUser: boolean, missedUsers: string[]) => {
-        if (addUser) {
-          setGroupChats((prevGroupChats) => {
-            const groupChatsCopy = [...prevGroupChats];
-            const chat = groupChatsCopy.find(
-              (chat) => chat._id === currentChat?._id
-            );
-            if (chat) {
-              if (users.length > currentChat.users.length) {
-                alert("Users added successfully");
-                chat.users = users;
+      socket.on(
+        "usersAdded",
+        (
+          addUser: boolean,
+          missedUsers: string[],
+          newUsers: {
+            role: "User" | "Admin" | "Owner" | "Author";
+            _id: string;
+          }[],
+          requiredUsers: {
+            [key: string]: UserClientType;
+          },
+          chatId: string,
+          dupes: string[]
+        ) => {
+          if (dupes) {
+            alert("Found duplicate users: " + dupes.join(", "));
+          }
+          if (addUser) {
+            setGroupChats((prevGroupChats) => {
+              const groupChatsCopy = [...prevGroupChats];
+              const chat = groupChatsCopy.find((chat) => chat._id === chatId);
+              if (chat) {
+                chat.users.push(...newUsers);
               }
-            }
-            return groupChatsCopy;
-          });
+              alert(
+                "Users added: " +
+                  newUsers
+                    .map((user) => requiredUsers[user._id].username)
+                    .join(", ")
+              );
+              newUsers.forEach((user) => {
+                setRequiredUsers((prevUsers) => {
+                  return {
+                    ...prevUsers,
+                    [user._id]: requiredUsers[user._id],
+                  };
+                });
+              });
+
+              return groupChatsCopy;
+            });
+          }
+          if (missedUsers.length) {
+            alert(
+              `The following users were not found: ${missedUsers.join(", ")}`
+            );
+          }
         }
-        if (missedUsers.length) {
-          alert(
-            `The following users were not found: ${missedUsers.join(", ")}`
-          );
-        }
-      });
+      );
     }
   }, [socket]);
 
@@ -287,10 +316,10 @@ export default function Dashboard() {
                         <div className="flex gap-2 items-center">
                           <img
                             className="rounded-full w-8 h-8"
-                            src={user.image}
+                            src={requiredUsers[user._id]?.image}
                           />
                           <h3 key={i} className="text-md">
-                            {user.username}
+                            {requiredUsers[user._id]?.username}
                           </h3>
                           <Select>
                             <SelectTrigger className="ml-auto w-[180px]">
@@ -300,6 +329,7 @@ export default function Dashboard() {
                               <SelectItem value="light">User</SelectItem>
                               <SelectItem value="dark">Admin</SelectItem>
                               <SelectItem value="system">Owner</SelectItem>
+                              <SelectItem value="system">Author</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>

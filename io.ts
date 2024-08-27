@@ -49,7 +49,6 @@ const createIOServer = (server: any) => {
         if (!chat) {
           return;
         }
-        console.log(user);
 
         chat.messages.push({
           sender: user._id as string,
@@ -57,14 +56,14 @@ const createIOServer = (server: any) => {
           timestamp: new Date().toISOString(),
         });
         const messagesender = user;
-        chat.users.forEach((user: string) => {
-          if (connectedUsers[user] && user !== id) {
+        chat.users.forEach((user) => {
+          if (connectedUsers[user._id] && user._id !== id) {
             console.log(
-              "sending message to " + connectedUsers[user],
+              "sending message to " + connectedUsers[user._id],
               socket.id
             );
 
-            io.to(connectedUsers[user]).emit("message", {
+            io.to(connectedUsers[user._id]).emit("message", {
               chatId,
               sender: messagesender._id,
               message,
@@ -88,17 +87,46 @@ const createIOServer = (server: any) => {
         return;
       }
       let missedUsers = [];
+      let newUsers: {
+        role: "User" | "Admin" | "Owner" | "Author";
+        _id: string;
+      }[] = [];
+      let requiredUsers: {
+        [key: string]: UserClientType;
+      } = {};
+      let dupes: string[] = [];
+
       let addUser = false;
       for (let handle of users) {
         let founduser: UserType = await User.findOne({ handle });
         if (founduser) {
-          if (!chat.users.includes((a: UserType) => a._id === founduser._id)) {
+          if (
+            !chat.users.some(
+              (a: {
+                _id: string;
+                role: "User" | "Admin" | "Owner" | "Author";
+              }) => {
+                return a._id.toString() === founduser._id.toString();
+              }
+            )
+          ) {
             addUser = true;
             console.log("adding user to chat");
-            chat.users.push(founduser._id);
+            chat.users.push({ _id: founduser._id, role: "User" });
             founduser.groupchats.push(chat._id);
-            console.log(founduser.groupchats);
+            newUsers.push({ _id: founduser._id, role: "User" });
+            requiredUsers[founduser._id.toString()] = {
+              username: founduser.username,
+              _id: founduser._id,
+              image: founduser.image,
+              handle: founduser.handle,
+              groupchats: [],
+              info: founduser.info,
+              auth0Id: founduser.auth0Id,
+            };
             await founduser.save();
+          } else {
+            dupes.push(founduser.username);
           }
         } else {
           missedUsers.push(handle);
@@ -106,7 +134,15 @@ const createIOServer = (server: any) => {
       }
       chat.markModified("users");
       await chat.save();
-      socket.emit("usersAdded", addUser, missedUsers);
+      socket.emit(
+        "usersAdded",
+        addUser,
+        missedUsers,
+        newUsers,
+        requiredUsers,
+        chatId,
+        dupes
+      );
     });
 
     socket.on("disconnect", () => {
