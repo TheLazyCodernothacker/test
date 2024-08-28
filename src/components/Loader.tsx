@@ -1,5 +1,5 @@
 import "../App.css";
-import Logo from "../Logo_square.png";
+import Logo from "../FeatherChatLogo.png";
 
 export default function Loader() {
   return (
