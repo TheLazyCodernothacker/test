@@ -326,10 +326,10 @@ export default function Dashboard() {
                               <SelectValue placeholder={user.role} />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="light">User</SelectItem>
-                              <SelectItem value="dark">Admin</SelectItem>
-                              <SelectItem value="system">Owner</SelectItem>
-                              <SelectItem value="system">Author</SelectItem>
+                              <SelectItem value="User">User</SelectItem>
+                              <SelectItem value="Admin">Admin</SelectItem>
+                              <SelectItem value="Owner">Owner</SelectItem>
+                              <SelectItem value="Author">Author</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>

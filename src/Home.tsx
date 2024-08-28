@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
-import Logo from "./Logo_square.png";
+import Logo from "./FeatherChatLogo.png";
 import { Button } from "@/components/ui/button";
 
 import "./App.css";
@@ -34,7 +34,7 @@ function App() {
                 with your friends in no time!
               </p>
               <a href="/login">
-                <Button size="lg" className="mt-6" variant={"secondary"}>
+                <Button size="lg" className="mt-6">
                   Get Started!
                 </Button>
               </a>
