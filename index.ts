@@ -98,9 +98,7 @@ async function createMainServer() {
   });
   const server = http.createServer(app);
   try {
-    await mongoose.connect(
-      "mongodb+srv://MaxLocke:yanjiasucks@coducationusers.8l73h11.mongodb.net/users?retryWrites=true&w=majority"
-    );
+    await mongoose.connect(process.env.MONGO_URL as string);
     console.log("Connected to MongoDB");
   } catch (error) {
     console.error(error);
@@ -189,7 +187,7 @@ async function createMainServer() {
     let chat: ChatType = new Chat({
       users: [
         {
-          role: "Owner",
+          role: "Author",
           _id: user._id,
         },
       ],
