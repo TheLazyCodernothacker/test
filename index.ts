@@ -189,7 +189,7 @@ async function createMainServer() {
     let chat: ChatType = new Chat({
       users: [
         {
-          role: "Author",
+          role: "Owner",
           _id: user._id,
         },
       ],
